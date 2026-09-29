@@ -1,0 +1,218 @@
+:root {
+  /* Fonts */
+  --font-serif: 'Sorts Mill Goudy', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Brand Palette - TULA */
+  --color-mata: #142817;
+  --color-mata-dark: #0a160d;
+  --color-mata-light: #213d26;
+  
+  --color-salvia: #8e9b85;
+  --color-salvia-dark: #6e7b65;
+  --color-salvia-light: #e6ebe2;
+  --color-salvia-bg: #f3f6f1;
+
+  --color-ocre: #c4913c;
+  --color-ocre-dark: #9e6f24;
+  --color-ocre-light: #faecd3;
+  --color-ocre-glow: rgba(196, 145, 60, 0.25);
+
+  --color-terra: #291d15;
+  --color-terra-light: #443224;
+
+  --color-ebano: #121212;
+  --color-charcoal: #1a1a1a;
+  --color-surface-dark: #222222;
+
+  --color-areia: #f9f8f5;
+  --color-areia-muted: #f0ede6;
+  --color-areia-dark: #e2ddd2;
+
+  --color-texto: #2a2e2b;
+  --color-texto-suave: #5c635e;
+  --color-texto-claro: #f8f8f8;
+  --color-texto-muted: #a0a6a1;
+
+  --color-borda: #e4dfd5;
+  --color-borda-dark: #2f2f2f;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Container */
+  --max-width: 1200px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-areia);
+  color: var(--color-texto);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-mata-dark);
+}
+
+h1 {
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  line-height: 1.15;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.25;
+}
+
+h3 {
+  font-size: clamp(1.3rem, 2vw, 1.75rem);
+  line-height: 1.35;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Common Layout Containers */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+/* Base Pill Button (Instagram Style) */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.4rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  transition: all 0.25s ease;
+}
+
+.btn-pill:hover {
+  background: #fff;
+  color: var(--color-ebano);
+  border-color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Solid Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  background-color: var(--color-mata);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 14px rgba(20, 40, 23, 0.25);
+  transition: all 0.25s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-mata-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(20, 40, 23, 0.35);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  background-color: transparent;
+  color: var(--color-mata);
+  border: 1.5px solid var(--color-mata);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-full);
+  transition: all 0.25s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-mata);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-ocre {
+  background-color: var(--color-ocre);
+  color: #fff;
+}
+
+.btn-ocre:hover {
+  background-color: var(--color-ocre-dark);
+}
