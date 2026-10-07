@@ -186,6 +186,20 @@ export function Footer() {
                 Abrir rota no Google Maps <ExternalLink size={12} />
               </a>
             </div>
+
+            {/* QR Code Linktree */}
+            <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ fontSize: '0.82rem', marginBottom: '0.6rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                Nossa Árvore de Links (Linktree):
+              </div>
+              <div style={{ display: 'inline-block', padding: '0.4rem', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                <img 
+                  src="/qrcode-linktree.png" 
+                  alt="QR Code Linktree do Terreiro Luz de Aruanda" 
+                  style={{ width: '85px', height: '85px', display: 'block', borderRadius: '6px' }} 
+                />
+              </div>
+            </div>
           </div>
         </div>
 
