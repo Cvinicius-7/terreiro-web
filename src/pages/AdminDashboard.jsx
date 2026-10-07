@@ -90,12 +90,33 @@ export function AdminDashboard() {
     alert('Números de WhatsApp copiados para a área de transferência!');
   };
 
+  const handleExportCSV = () => {
+    if (leads.length === 0) return;
+    let csvContent = "Data,Nome,WhatsApp,E-mail\n";
+    leads.forEach(lead => {
+      const dataStr = new Date(lead.created_at).toLocaleDateString('pt-BR');
+      const nomeStr = `"${lead.name.replace(/"/g, '""')}"`;
+      const foneStr = `"${lead.phone || ''}"`;
+      const emailStr = `"${lead.email || ''}"`;
+      csvContent += `${dataStr},${nomeStr},${foneStr},${emailStr}\n`;
+    });
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `contatos_terreiro_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
       {/* Header Admin */}
       <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '40px' }}><Logo variant="dark" /></div>
+          <Logo variant="dark" showText={false} size={36} />
           <h1 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--color-mata-dark)' }}>Painel Administrativo</h1>
         </div>
         <button 
@@ -225,9 +246,14 @@ export function AdminDashboard() {
           <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ fontSize: '1.4rem', color: 'var(--color-mata-dark)' }}>Contatos da Comunidade</h2>
-              <button onClick={handleCopyLeads} className="btn-secondary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
-                Copiar WhatsApps (Para Lista Transmissão)
-              </button>
+              <div style={{ display: 'flex', gap: '0.8rem' }}>
+                <button onClick={handleExportCSV} className="btn-primary btn-ocre" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  Exportar (CSV)
+                </button>
+                <button onClick={handleCopyLeads} className="btn-secondary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
+                  Copiar WhatsApps
+                </button>
+              </div>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
