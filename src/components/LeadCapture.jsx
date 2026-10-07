@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Send, CheckCircle, Mail, Phone, User } from 'lucide-react';
 
+// Mesmo padrão usado na CHECK constraint `leads_valid_chk` do banco
+const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
 export function LeadCapture() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
@@ -12,10 +15,26 @@ export function LeadCapture() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validar se pelo menos um contato foi preenchido
-    if (!formData.email && !formData.phone) {
+
+    // Normaliza e valida (o banco repete essas regras via CHECK constraint)
+    const name = formData.name.trim();
+    const email = formData.email.trim().toLowerCase();
+    const phone = formData.phone.replace(/\D/g, ''); // só dígitos
+
+    if (name.length < 2 || name.length > 100) {
+      alert('Informe um nome entre 2 e 100 caracteres.');
+      return;
+    }
+    if (!email && !phone) {
       alert("Por favor, preencha pelo menos o e-mail ou o WhatsApp.");
+      return;
+    }
+    if (email && (email.length > 254 || !EMAIL_REGEX.test(email))) {
+      alert('E-mail inválido.');
+      return;
+    }
+    if (phone && (phone.length < 10 || phone.length > 13)) {
+      alert('WhatsApp inválido. Use DDD + número, ex: (41) 99999-0000.');
       return;
     }
 
@@ -26,9 +45,9 @@ export function LeadCapture() {
         .from('community_leads')
         .insert([
           {
-            name: formData.name,
-            email: formData.email || null,
-            phone: formData.phone || null
+            name,
+            email: email || null,
+            phone: phone || null
           }
         ]);
 
@@ -155,6 +174,7 @@ export function LeadCapture() {
                     <input
                       type="text"
                       name="name"
+                      maxLength={100}
                       value={formData.name}
                       onChange={handleChange}
                       required
@@ -171,6 +191,7 @@ export function LeadCapture() {
                     <input
                       type="tel"
                       name="phone"
+                      maxLength={20}
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="(41) 90000-0000"
@@ -186,6 +207,7 @@ export function LeadCapture() {
                     <input
                       type="email"
                       name="email"
+                      maxLength={254}
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="seu@email.com"

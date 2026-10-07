@@ -28,6 +28,7 @@ export function AdminGiraForm({ gira, onSave, onCancel }) {
 
   useEffect(() => {
     if (gira) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(gira);
       if (gira.bg_image) {
         setImagePreview(gira.bg_image);
@@ -45,12 +46,26 @@ export function AdminGiraForm({ gira, onSave, onCancel }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      // Cria uma URL local para preview da imagem antes de subir pro Supabase
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
+    if (!file) return;
+
+    // Validação de tipo e tamanho (o bucket também impõe isso no servidor)
+    if (!ALLOWED_IMAGE_TYPES[file.type]) {
+      alert('Formato não suportado. Envie uma imagem PNG, JPG ou WEBP.');
+      e.target.value = '';
+      return;
     }
+    if (file.size > MAX_IMAGE_BYTES) {
+      alert('Imagem muito grande. O limite é 5 MB.');
+      e.target.value = '';
+      return;
+    }
+
+    setImageFile(file);
+    // URL local para preview antes de subir pro Supabase
+    setImagePreview(prev => {
+      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -62,15 +77,17 @@ export function AdminGiraForm({ gira, onSave, onCancel }) {
 
       // 1. Se o usuário selecionou uma nova imagem, faz o upload pro Storage
       if (imageFile) {
-        // Gera um nome único para o arquivo
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `gira-${Date.now()}.${fileExt}`;
+        // Extensão derivada do MIME validado — nunca do nome enviado pelo usuário
+        const fileExt = ALLOWED_IMAGE_TYPES[imageFile.type];
+        if (!fileExt) throw new Error('Formato de imagem inválido.');
+        const fileName = `gira-${crypto.randomUUID()}.${fileExt}`;
         
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('tula-images')
           .upload(fileName, imageFile, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
+            contentType: imageFile.type
           });
 
         if (uploadError) {
@@ -85,17 +102,17 @@ export function AdminGiraForm({ gira, onSave, onCancel }) {
         finalBgImage = publicUrlData.publicUrl;
       }
 
-      // Prepara os dados finais para salvar no banco
-      const dataToSave = {
-        ...formData,
-        bg_image: finalBgImage
-      };
+      // Monta o payload só com os campos editáveis (allowlist).
+      // Evita reenviar id/created_at ou qualquer chave extra vinda do objeto carregado.
+      const dataToSave = buildGiraPayload(formData, finalBgImage);
+      const validationError = validateGira(dataToSave);
+      if (validationError) throw new Error(validationError);
 
       // 3. Salva no banco de dados (Insert ou Update)
       if (gira && gira.id) {
         const { error } = await supabase
           .from('giras')
-          .update(dataToSave)
+          .update({ ...dataToSave, updated_at: new Date().toISOString() })
           .eq('id', gira.id);
         if (error) throw error;
       } else {
@@ -161,7 +178,7 @@ export function AdminGiraForm({ gira, onSave, onCancel }) {
             {/* Input File Invisível cobrindo a div */}
             <input 
               type="file" 
-              accept="image/*" 
+              accept="image/png,image/jpeg,image/webp" 
               onChange={handleImageChange} 
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
             />
@@ -234,3 +251,56 @@ const inputStyle = {
   outline: 'none',
   fontFamily: 'inherit'
 };
+
+// ===== Regras de upload (espelham a config do bucket 'tula-images') =====
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_IMAGE_TYPES = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp'
+};
+
+// ===== Campos editáveis e limites (espelham as CHECK constraints do banco) =====
+const GIRA_FIELD_LIMITS = {
+  title: 80,
+  line: 120,
+  subtitle: 120,
+  date_badge: 40,
+  full_date: 60,
+  day_of_week: 30,
+  doors_open: 60,
+  starts_at: 60,
+  location: 200,
+  description: 2000,
+  recommendations: 1000
+};
+const GIRA_STATUSES = ['aberta', 'cancelada', 'especial'];
+
+function buildGiraPayload(formData, bgImage) {
+  const payload = {};
+  for (const field of Object.keys(GIRA_FIELD_LIMITS)) {
+    payload[field] = String(formData[field] ?? '').trim();
+  }
+  payload.date = formData.date;
+  payload.status = formData.status;
+  payload.is_featured = Boolean(formData.is_featured);
+  payload.color_theme = formData.color_theme || '#1b3322';
+  payload.bg_image = bgImage || null;
+  return payload;
+}
+
+function validateGira(payload) {
+  for (const [field, max] of Object.entries(GIRA_FIELD_LIMITS)) {
+    if (payload[field].length > max) {
+      return `O campo "${field}" excede o limite de ${max} caracteres.`;
+    }
+  }
+  if (!payload.line) return 'Informe a linha da gira.';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) return 'Data inválida.';
+  if (!GIRA_STATUSES.includes(payload.status)) return 'Status inválido.';
+  if (!/^#[0-9A-Fa-f]{6}$/.test(payload.color_theme)) return 'Cor temática inválida.';
+  if (payload.bg_image && !/^https:\/\/[^\s"'()<>]+$/.test(payload.bg_image)) {
+    return 'A URL da imagem precisa começar com https://';
+  }
+  return null;
+}

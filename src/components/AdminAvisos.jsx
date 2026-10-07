@@ -10,10 +10,6 @@ export function AdminAvisos() {
   const [formData, setFormData] = useState({ id: null, message: '', type: 'info', is_active: true });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchAvisos();
-  }, []);
-
   const fetchAvisos = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -26,6 +22,11 @@ export function AdminAvisos() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAvisos();
+  }, []);
 
   const handleAdd = () => {
     setFormData({ id: null, message: '', type: 'info', is_active: true });
@@ -58,28 +59,43 @@ export function AdminAvisos() {
     e.preventDefault();
     setSaving(true);
     
+    const message = String(formData.message || '').trim();
+    if (!message || message.length > 280) {
+      setSaving(false);
+      alert('A mensagem do aviso deve ter entre 1 e 280 caracteres.');
+      return;
+    }
+    if (!['info', 'alerta', 'urgente'].includes(formData.type)) {
+      setSaving(false);
+      alert('Tipo de aviso inválido.');
+      return;
+    }
+
     const payload = {
-      message: formData.message,
+      message,
       type: formData.type,
-      is_active: formData.is_active
+      is_active: Boolean(formData.is_active)
     };
 
-    let error = null;
     if (formData.id) {
-      const res = await supabase.from('avisos').update(payload).eq('id', formData.id);
-      error = res.error;
+      const { error: updateError } = await supabase.from('avisos').update(payload).eq('id', formData.id);
+      if (updateError) {
+        setSaving(false);
+        alert("Erro ao salvar: " + updateError.message);
+        return;
+      }
     } else {
-      const res = await supabase.from('avisos').insert([payload]);
-      error = res.error;
+      const { error: insertError } = await supabase.from('avisos').insert([payload]);
+      if (insertError) {
+        setSaving(false);
+        alert("Erro ao salvar: " + insertError.message);
+        return;
+      }
     }
 
     setSaving(false);
-    if (!error) {
-      setView('list');
-      fetchAvisos();
-    } else {
-      alert("Erro ao salvar: " + error.message);
-    }
+    setView('list');
+    fetchAvisos();
   };
 
   if (view === 'form') {
