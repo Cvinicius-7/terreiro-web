@@ -21,11 +21,14 @@ function ScrollToTop() {
   return null;
 }
 
+import { FloatingWhatsApp } from './components/FloatingWhatsApp';
+
 function PublicLayout({ children }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
       <div style={{ flex: 1 }}>{children}</div>
+      <FloatingWhatsApp />
       <Footer />
     </div>
   );
