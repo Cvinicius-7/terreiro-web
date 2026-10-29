@@ -3,10 +3,10 @@ import { Heart, Copy, Check, ShieldCheck, Gift, ShoppingBag, Sparkles } from 'lu
 
 export function Doacoes() {
   const [copied, setCopied] = useState(false);
-  const pixKey = "tendatula7@gmail.com";
+  const pixKey = "";
 
   const handleCopyPix = () => {
-    navigator.clipboard.writeText(pixKey);
+    if (!pixKey) return; navigator.clipboard.writeText(pixKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
   };
@@ -121,13 +121,13 @@ export function Doacoes() {
               <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-texto-suave)', fontWeight: 600 }}>
                 Chave Pix (E-mail):
               </div>
-              <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, color: 'var(--color-mata-dark)', fontSize: '1.05rem', wordBreak: 'break-all' }}>
+              <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, color: 'var(--color-mata-dark)', fontSize: '1.05rem', wordBreak: 'break-all', minHeight: '1.5rem' }}>
                 {pixKey}
               </div>
             </div>
 
             <button 
-              onClick={handleCopyPix}
+              onClick={handleCopyPix} disabled={!pixKey}
               className="btn-primary btn-ocre"
               style={{
                 padding: '0.6rem 1.2rem',

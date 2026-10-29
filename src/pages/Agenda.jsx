@@ -19,7 +19,7 @@ export function Agenda() {
     if (filter === 'todas') return true;
     if (filter === 'caboclos') return gira.line.toLowerCase().includes('caboclo');
     if (filter === 'pretos-velhos') return gira.line.toLowerCase().includes('pretos velhos') || gira.line.toLowerCase().includes('erê');
-    if (filter === 'baianos') return gira.line.toLowerCase().includes('baiano') || gira.line.toLowerCase().includes('cigano');
+    if (filter === 'baianos') return gira.line.toLowerCase().includes('baiano') || gira.line.toLowerCase().includes('cigano') || gira.line.toLowerCase().includes('neutra') || gira.line.toLowerCase().includes('neutro');
     if (filter === 'esquerda') return gira.line.toLowerCase().includes('guardiões') || gira.line.toLowerCase().includes('exu');
     return true;
   });

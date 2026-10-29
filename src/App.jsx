@@ -21,7 +21,7 @@ function ScrollToTop() {
   return null;
 }
 
-import { FloatingWhatsApp } from './components/FloatingWhatsApp';
+// import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 
 function PublicLayout({ children }) {
   const location = useLocation();
@@ -33,7 +33,7 @@ function PublicLayout({ children }) {
       <main key={location.pathname} className="page-transition" style={{ flex: 1 }}>
         {children}
       </main>
-      <FloatingWhatsApp />
+      {/* <FloatingWhatsApp /> */}
       <Footer />
     </div>
   );
